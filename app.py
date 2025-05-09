@@ -4,6 +4,8 @@ from urllib.parse import urlparse, parse_qs
 
 app = Flask(__name__)
 
+# this flask app is used to serve the data from the scholarly library
+
 def get_pub_id(pub):
     """Extract publication ID from publication URL"""
     url = pub.get('pub_url', '')
