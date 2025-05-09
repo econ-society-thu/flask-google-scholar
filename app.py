@@ -6,6 +6,13 @@ app = Flask(__name__)
 
 # this flask app is used to serve the data from the scholarly library
 
+
+def get_publication_id(publication):
+    try:
+        return publication["author_pub_id"]
+    except:
+        return None
+
 def get_pub_id(pub):
     """Extract publication ID from publication URL"""
     url = pub.get('pub_url', '')
@@ -35,7 +42,7 @@ def get_publication(author_id, pub_id):
         author = scholarly.search_author_id(author_id)
         scholarly.fill(author, sections=['publications'])
         for pub in author['publications']:
-            if get_pub_id(pub) == pub_id:
+            if str(get_publication_id(pub)) == str(pub_id):
                 scholarly.fill(pub)  # Fill with additional details
                 return jsonify(pub)
         return jsonify({'error': 'Publication not found'}), 404
@@ -43,4 +50,4 @@ def get_publication(author_id, pub_id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port = 21114)
+    app.run(debug=True, host='0.0.0.0', port = 21114)
