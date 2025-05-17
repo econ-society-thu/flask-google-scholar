@@ -30,7 +30,25 @@ def get_author(author_id):
     """Get all author data including publications"""
     try:
         author = scholarly.search_author_id(author_id)
-        scholarly.fill(author, sections=['publications'])
+        scholarly.fill(author, sections=['publications', 'coauthors'])
+        
+        # Process coauthors to extract their IDs
+        if 'coauthors' in author:
+            for coauthor_id in range(len(author['coauthors'])):
+                coauthor = author['coauthors'][coauthor_id]
+                if 'scholar_id' not in coauthor and 'url_picture' in coauthor:
+                    # Extract scholar_id from URL if available
+                    try:
+                        url = coauthor['url_picture']
+                        parsed_url = urlparse(url)
+                        query_params = parse_qs(parsed_url.query)
+                        scholar_id = query_params.get('user', [None])[0]
+                        if scholar_id:
+                            coauthor['scholar_id'] = scholar_id
+                    except:
+                        pass
+                author['coauthors'][coauthor_id] = coauthor['scholar_id']
+                        
         return jsonify(author)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -50,4 +68,4 @@ def get_publication(author_id, pub_id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port = 21114)
+    app.run(host='127.0.0.1', port = 21113)
